@@ -45,7 +45,7 @@
             let response = await fetch(sheetUrl, { method: "POST", body: data });
             let result = await response.text();
 
-            if (result === "success") {
+            if (result.trim() === "success") {
                 alert("예약이 완료되었습니다!");
                 fetchBookings();
             } else {
