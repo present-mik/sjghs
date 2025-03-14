@@ -16,6 +16,12 @@
         let isBookingInProgress = false; // 예약 중 여부 체크
         let currentSlot = null;
 
+        // 시간 형식 통일 함수 (초 단위를 제거한 HH:MM 형식으로 변환)
+        function normalizeTime(time) {
+            let [hours, minutes] = time.split(':');
+            return hours + ':' + minutes;
+        }
+
         async function fetchBookings() {
             let response = await fetch(sheetUrl + "?action=fetch");
             let data = await response.json();
@@ -25,9 +31,10 @@
         function updateSlots(bookings) {
             document.querySelectorAll(".slot").forEach(slot => {
                 let slotKey = slot.dataset.date + " " + slot.dataset.time;
+                let normalizedSlotTime = normalizeTime(slot.dataset.time);
 
                 // 예약된 시간대를 확인하고 해당 시간에 예약이 있으면 클릭 불가 처리
-                if (bookings.some(b => b.date === slot.dataset.date && b.time === slot.dataset.time) || disabledSlots[slot.dataset.date]?.includes(slot.dataset.time)) {
+                if (bookings.some(b => normalizeTime(b.time) === normalizedSlotTime && b.date === slot.dataset.date) || disabledSlots[slot.dataset.date]?.includes(slot.dataset.time)) {
                     slot.classList.add("booked");
                     slot.innerText = slot.dataset.time + " (예약 불가)";
                     slot.onclick = null; // 클릭 이벤트 제거
