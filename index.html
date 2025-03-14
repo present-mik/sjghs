@@ -3,7 +3,7 @@
 <head>
     <title>학부모 상담 예약 시스템</title>
     <script>
-        let sheetUrl = "https://script.google.com/macros/s/AKfycbwqHrWrhC5gH6F64J7gR1f9cfnwbJX8oxtM5IujY-Rvf9NVb7p3UsxGNBMGbVUVYe1tDw/exec";
+        let sheetUrl = "https://script.google.com/macros/s/AKfycbxqspqAQgtAnnF-rJ07Zc6iI6Y7HPYnQ5JmFSiFIXuVPYMG5CRdtZdK7Ps2e6L9ozbWYg/exec";
         let disabledSlots = {
             "2025-03-24": ["11:00", "15:50", "17:00", "17:30"],
             "2025-03-25": ["09:00", "13:50", "14:50", "15:50", "17:00", "17:30"],
@@ -57,7 +57,7 @@
             data.append("date", slot.dataset.date);
             data.append("time", slot.dataset.time);
             data.append("name", name);
-            data.append("method", method);
+            data.append("method", method);  // 전화/방문 여부 추가
 
             let response = await fetch(sheetUrl, { method: "POST", body: data });
             let result = await response.text();
