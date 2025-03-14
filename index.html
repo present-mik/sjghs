@@ -3,7 +3,7 @@
 <head>
     <title>학부모 상담 예약 시스템</title>
     <script>
-        let sheetUrl = "https://script.google.com/macros/s/AKfycbwJRcQ0dfLGFpgtj2h3qFH-XQHffZWsDSA40Cds81OqmDlpOQsRDf91Lql7vVDHdHmcWg/exec";
+        let sheetUrl = "https://script.google.com/macros/s/AKfycbxpOIhrJ1qx0OO6Nkt1AHXMwIqpaohiw-OqRpUUtxOA1MsIof1kWoHdrUsDyNoU989MRg/exec";
         let disabledSlots = {
             "2025-03-24": ["11:00", "15:50", "17:00", "17:30"],
             "2025-03-25": ["09:00", "13:50", "14:50", "15:50", "17:00", "17:30"],
@@ -13,6 +13,7 @@
         };
 
         let refreshInterval;
+        let isBookingInProgress = false; // 예약 중 여부 체크
 
         async function fetchBookings() {
             let response = await fetch(sheetUrl + "?action=fetch");
@@ -32,11 +33,14 @@
         }
 
         async function bookSlot(slot) {
+            if (isBookingInProgress) return; // 예약 중이면 중복 예약 방지
+            isBookingInProgress = true; // 예약 진행 중 설정
             clearInterval(refreshInterval); // 자동 갱신 중지
             await fetchBookings(); // 최신 데이터 가져오기 (중복 예약 방지)
 
             let name = prompt("이름을 입력하세요:");
             if (!name) {
+                isBookingInProgress = false; // 예약 취소 시 예약 진행 중 해제
                 refreshInterval = setInterval(fetchBookings, 5000); // 갱신 재개
                 return;
             }
@@ -45,7 +49,7 @@
 
             slot.onclick = null;
             slot.innerText = slot.dataset.time + " (예약 처리 중...)";
-            
+
             let data = new FormData();
             data.append("action", "book");
             data.append("date", slot.dataset.date);
@@ -63,6 +67,7 @@
             }
 
             fetchBookings(); // 예약 결과 반영
+            isBookingInProgress = false; // 예약 진행 중 해제
             refreshInterval = setInterval(fetchBookings, 5000); // 갱신 재개 (5초마다)
         }
 
@@ -103,18 +108,37 @@
         }
     </script>
     <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+
         .slot {
             cursor: pointer;
             padding: 10px;
             border: 1px solid #000;
             margin: 5px;
             display: inline-block;
+            text-align: center;
+            width: 80px;
         }
+
         .booked {
             background: #ccc;
             cursor: not-allowed;
             opacity: 0.6;
             pointer-events: none;
+        }
+
+        h3 {
+            margin-top: 20px;
+            font-size: 18px;
+        }
+
+        @media (max-width: 600px) {
+            .slot {
+                width: 100px;
+                font-size: 14px;
+            }
         }
     </style>
 </head>
