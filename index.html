@@ -3,7 +3,7 @@
 <head>
     <title>학부모 상담 예약 시스템</title>
     <script>
-        let sheetUrl = "https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec";
+        let sheetUrl = "https://script.google.com/macros/s/AKfycbwqHrWrhC5gH6F64J7gR1f9cfnwbJX8oxtM5IujY-Rvf9NVb7p3UsxGNBMGbVUVYe1tDw/exec";
 
         let disabledSlots = {
             "2025-03-24": ["11:00", "15:50", "17:00", "17:30"],
@@ -33,19 +33,15 @@
         async function bookSlot(slot) {
             let name = prompt("이름을 입력하세요:");
             if (!name) return;
-
-            let contactMethod = prompt("예약 방법을 선택하세요 (전화/방문):", "전화");
-            if (!contactMethod || (contactMethod !== "전화" && contactMethod !== "방문")) {
-                alert("올바른 값을 입력하세요 (전화 또는 방문)");
-                return;
-            }
-
+            
+            let method = confirm("방문 상담을 원하시면 확인(OK), 전화 상담을 원하시면 취소(Cancel)을 눌러주세요.") ? "방문" : "전화";
+            
             let data = new FormData();
             data.append("action", "book");
             data.append("date", slot.dataset.date);
             data.append("time", slot.dataset.time);
             data.append("name", name);
-            data.append("method", contactMethod);
+            data.append("method", method);
 
             let response = await fetch(sheetUrl, { method: "POST", body: data });
             let result = await response.text();
