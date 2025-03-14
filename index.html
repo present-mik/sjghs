@@ -62,18 +62,24 @@
             if (isBookingInProgress) return; // 예약 중이면 중복 예약 방지
             isBookingInProgress = true; // 예약 진행 중 설정
             currentSlot = slot; // 현재 선택된 시간대 저장
-            document.getElementById("method-selection").style.display = "block"; // 전화/방문 선택 버튼 표시
+            document.getElementById("name-input").style.display = "block"; // 이름 입력 창 표시
         }
 
-        async function bookSlot(method) {
-            if (!currentSlot) {
-                alert("시간대를 선택해 주세요.");
+        async function bookSlot() {
+            let name = document.getElementById("name").value;
+            let method = document.getElementById("method").value;
+
+            if (!name) {
+                alert("이름을 입력해 주세요.");
+                return;
+            }
+            if (!method) {
+                alert("상담 방법을 선택해 주세요.");
                 return;
             }
 
-            let name = prompt("이름을 입력하세요:");
-            if (!name) {
-                isBookingInProgress = false; // 예약 취소 시 예약 진행 중 해제
+            if (!currentSlot) {
+                alert("시간대를 선택해 주세요.");
                 return;
             }
 
@@ -98,7 +104,7 @@
             document.getElementById("loading").style.display = "none"; // 로딩 스피너 숨기기
             fetchBookings(); // 예약 결과 반영
             isBookingInProgress = false; // 예약 진행 중 해제
-            document.getElementById("method-selection").style.display = "none"; // 방법 선택 창 숨기기
+            document.getElementById("name-input").style.display = "none"; // 이름 입력 창 숨기기
         }
 
         window.onload = function () {
@@ -179,18 +185,18 @@
             text-align: center;
         }
 
-        /* 방법 선택 버튼 스타일 */
-        #method-selection {
+        /* 이름 입력 창 스타일 */
+        #name-input {
             display: none;
             margin-top: 20px;
             text-align: center;
         }
 
-        #method-selection button {
+        /* 방법 선택 드롭다운 스타일 */
+        #name-input select {
             padding: 10px;
             font-size: 16px;
             margin: 5px;
-            cursor: pointer;
         }
     </style>
 </head>
@@ -200,10 +206,17 @@
     <!-- 로딩 스피너 -->
     <div id="loading">로딩 중...</div>
 
-    <!-- 방법 선택 버튼 -->
-    <div id="method-selection">
-        <button onclick="bookSlot('전화')">전화 상담</button>
-        <button onclick="bookSlot('방문')">방문 상담</button>
+    <!-- 이름 입력 및 방법 선택 -->
+    <div id="name-input">
+        <input type="text" id="name" placeholder="이름을 입력하세요">
+        <br>
+        <select id="method">
+            <option value="">상담 방법 선택</option>
+            <option value="전화">전화 상담</option>
+            <option value="방문">방문 상담</option>
+        </select>
+        <br>
+        <button onclick="bookSlot()">예약하기</button>
     </div>
 
     <div id="slots"></div>
