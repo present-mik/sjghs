@@ -30,10 +30,15 @@
         }
 
         async function bookSlot(slot) {
+            await fetchBookings(); // 최신 데이터 가져오기 (중복 예약 방지)
+
             let name = prompt("이름을 입력하세요:");
             if (!name) return;
-            
+
             let method = confirm("전화 상담을 원하시면 확인(OK), 방문 상담을 원하시면 취소(Cancel)을 눌러주세요.") ? "전화" : "방문";
+
+            slot.onclick = null;
+            slot.innerText = slot.dataset.time + " (예약 처리 중...)";
             
             let data = new FormData();
             data.append("action", "book");
@@ -47,11 +52,11 @@
 
             if (result.trim() === "success") {
                 alert("예약이 완료되었습니다!");
-                fetchBookings();
             } else {
                 alert("이미 예약된 시간입니다.");
-                fetchBookings();
             }
+
+            fetchBookings(); // 예약 결과 반영
         }
 
         window.onload = function () {
