@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>학부모 상담 예약 시스템</title>
+    <script>
+        let sheetUrl = "https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec";
+
+        let disabledSlots = {
+            "2025-03-24": ["12:00", "15:00"],
+            "2025-03-25": ["09:00", "14:00"],
+            "2025-03-26": ["11:00", "16:00"],
+            "2025-03-27": ["10:00", "13:00"],
+            "2025-03-28": ["12:00", "15:00"]
+        };
+
+        async function fetchBookings() {
+            let response = await fetch(sheetUrl + "?action=fetch");
+            let data = await response.json();
+            updateSlots(data);
+        }
+
+        function updateSlots(bookings) {
+            document.querySelectorAll(".slot").forEach(slot => {
+                let slotKey = slot.dataset.date + " " + slot.dataset.time;
+                if (bookings.includes(slotKey) || disabledSlots[slot.dataset.date]?.includes(slot.dataset.time)) {
+                    slot.classList.add("booked");
+                    slot.innerText += " (예약 불가)";
+                    slot.onclick = null;
+                }
+            });
+        }
+
+        async function bookSlot(slot) {
+            let name = prompt("이름을 입력하세요:");
+            if (!name) return;
+            
+            let data = new FormData();
+            data.append("action", "book");
+            data.append("date", slot.dataset.date);
+            data.append("time", slot.dataset.time);
+            data.append("name", name);
+
+            let response = await fetch(sheetUrl, { method: "POST", body: data });
+            let result = await response.text();
+
+            if (result === "success") {
+                alert("예약이 완료되었습니다!");
+                fetchBookings();
+            } else {
+                alert("이미 예약된 시간입니다.");
+            }
+        }
+
+        window.onload = fetchBookings;
+    </script>
+    <style>
+        .slot { cursor: pointer; padding: 10px; border: 1px solid #000; margin: 5px; display: inline-block; }
+        .booked { background: #ccc; cursor: not-allowed; }
+    </style>
+</head>
+<body>
+    <h2>학부모 상담 예약</h2>
+    <div id="slots">
+        <script>
+            let dates = ["2025-03-24", "2025-03-25", "2025-03-26", "2025-03-27", "2025-03-28"];
+            let times = ["09:00", "10:00", "11:00", "13:50", "14:50", "15:50", "17:00", "19:30", "20:10"];
+            dates.forEach(date => {
+                document.write(`<h3>${date}</h3>`);
+                times.forEach(time => {
+                    let disabled = disabledSlots[date]?.includes(time);
+                    document.write(`<div class='slot ${disabled ? "booked" : ""}' data-date='${date}' data-time='${time}' ${disabled ? "" : "onclick='bookSlot(this)'"}>${time} ${disabled ? "(예약 불가)" : ""}</div>`);
+                });
+            });
+        </script>
+    </div>
+</body>
+</html>
