@@ -25,10 +25,16 @@
         function updateSlots(bookings) {
             document.querySelectorAll(".slot").forEach(slot => {
                 let slotKey = slot.dataset.date + " " + slot.dataset.time;
+
+                // 예약된 시간대를 확인하고 해당 시간에 예약이 있으면 클릭 불가 처리
                 if (bookings.some(b => b.date === slot.dataset.date && b.time === slot.dataset.time) || disabledSlots[slot.dataset.date]?.includes(slot.dataset.time)) {
                     slot.classList.add("booked");
                     slot.innerText = slot.dataset.time + " (예약 불가)";
-                    slot.onclick = null;
+                    slot.onclick = null; // 클릭 이벤트 제거
+                } else {
+                    slot.classList.remove("booked");
+                    slot.innerText = slot.dataset.time;
+                    slot.onclick = function () { selectMethod(slot); }; // 예약 가능 시간대는 클릭 가능하도록
                 }
             });
         }
