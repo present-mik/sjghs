@@ -3,7 +3,7 @@
 <head>
     <title>학부모 상담 예약 시스템</title>
     <script>
-        let sheetUrl = "https://script.google.com/macros/s/AKfycbxqspqAQgtAnnF-rJ07Zc6iI6Y7HPYnQ5JmFSiFIXuVPYMG5CRdtZdK7Ps2e6L9ozbWYg/exec";
+        let sheetUrl = "https://script.google.com/macros/s/AKfycbwqHrWrhC5gH6F64J7gR1f9cfnwbJX8oxtM5IujY-Rvf9NVb7p3UsxGNBMGbVUVYe1tDw/exec";
         let disabledSlots = {
             "2025-03-24": ["11:00", "15:50", "17:00", "17:30"],
             "2025-03-25": ["09:00", "13:50", "14:50", "15:50", "17:00", "17:30"],
@@ -14,6 +14,7 @@
 
         let refreshInterval;
         let isBookingInProgress = false; // 예약 중 여부 체크
+        let currentSlot = null;
 
         async function fetchBookings() {
             let response = await fetch(sheetUrl + "?action=fetch");
@@ -32,32 +33,33 @@
             });
         }
 
-        async function bookSlot(slot) {
+        async function selectMethod(slot) {
             if (isBookingInProgress) return; // 예약 중이면 중복 예약 방지
             isBookingInProgress = true; // 예약 진행 중 설정
-            clearInterval(refreshInterval); // 자동 갱신 중지
-            await fetchBookings(); // 최신 데이터 가져오기 (중복 예약 방지)
+            currentSlot = slot; // 현재 선택된 시간대 저장
+            document.getElementById("method-selection").style.display = "block"; // 전화/방문 선택 버튼 표시
+        }
+
+        async function bookSlot(method) {
+            if (!currentSlot) {
+                alert("시간대를 선택해 주세요.");
+                return;
+            }
 
             let name = prompt("이름을 입력하세요:");
             if (!name) {
                 isBookingInProgress = false; // 예약 취소 시 예약 진행 중 해제
-                refreshInterval = setInterval(fetchBookings, 5000); // 갱신 재개
                 return;
             }
 
-            let method = confirm("전화 상담을 원하시면 확인(OK), 방문 상담을 원하시면 취소(Cancel)을 눌러주세요.") ? "전화" : "방문";
-
-            slot.onclick = null;
-            slot.innerText = slot.dataset.time + " (예약 처리 중...)";
-            
             document.getElementById("loading").style.display = "block"; // 로딩 스피너 표시
 
             let data = new FormData();
             data.append("action", "book");
-            data.append("date", slot.dataset.date);
-            data.append("time", slot.dataset.time);
+            data.append("date", currentSlot.dataset.date);
+            data.append("time", currentSlot.dataset.time);
             data.append("name", name);
-            data.append("method", method);  // 전화/방문 여부 추가
+            data.append("method", method); // 선택된 방법을 전송
 
             let response = await fetch(sheetUrl, { method: "POST", body: data });
             let result = await response.text();
@@ -69,10 +71,9 @@
             }
 
             document.getElementById("loading").style.display = "none"; // 로딩 스피너 숨기기
-
             fetchBookings(); // 예약 결과 반영
             isBookingInProgress = false; // 예약 진행 중 해제
-            refreshInterval = setInterval(fetchBookings, 5000); // 갱신 재개 (5초마다)
+            document.getElementById("method-selection").style.display = "none"; // 방법 선택 창 숨기기
         }
 
         window.onload = function () {
@@ -103,7 +104,7 @@
                         slot.classList.add("booked");
                         slot.innerText += " (예약 불가)";
                     } else {
-                        slot.onclick = function () { bookSlot(slot); };
+                        slot.onclick = function () { selectMethod(slot); }; // 시간대 클릭 시 방법 선택
                     }
 
                     slotsContainer.appendChild(slot);
@@ -152,6 +153,20 @@
             margin-top: 20px;
             text-align: center;
         }
+
+        /* 방법 선택 버튼 스타일 */
+        #method-selection {
+            display: none;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        #method-selection button {
+            padding: 10px;
+            font-size: 16px;
+            margin: 5px;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -159,6 +174,12 @@
 
     <!-- 로딩 스피너 -->
     <div id="loading">로딩 중...</div>
+
+    <!-- 방법 선택 버튼 -->
+    <div id="method-selection">
+        <button onclick="bookSlot('전화')">전화 상담</button>
+        <button onclick="bookSlot('방문')">방문 상담</button>
+    </div>
 
     <div id="slots"></div>
 </body>
