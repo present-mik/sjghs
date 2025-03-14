@@ -3,7 +3,7 @@
 <head>
     <title>학부모 상담 예약 시스템</title>
     <script>
-        let sheetUrl = "AKfycbxClXlAIrVkWHbutcEzgnDPAl040Bpfa_e8yS9leNUcHfKd4z-z9knhK9qcDuVVLzyEZw";
+        let sheetUrl = "https://script.google.com/macros/s/AKfycbwqHrWrhC5gH6F64J7gR1f9cfnwbJX8oxtM5IujY-Rvf9NVb7p3UsxGNBMGbVUVYe1tDw/exec";
 
         let disabledSlots = {
             "2025-03-24": ["11:00", "15:50", "17:00", "17:30"],
@@ -24,7 +24,7 @@
                 let slotKey = slot.dataset.date + " " + slot.dataset.time;
                 if (bookings.includes(slotKey) || disabledSlots[slot.dataset.date]?.includes(slot.dataset.time)) {
                     slot.classList.add("booked");
-                    slot.innerText += " (예약 불가)";
+                    slot.innerText = slot.dataset.time + " (예약 불가)";
                     slot.onclick = null;
                 }
             });
@@ -34,7 +34,7 @@
             let name = prompt("이름을 입력하세요:");
             if (!name) return;
             
-            let method = confirm("방문 상담을 원하시면 확인(OK), 전화 상담을 원하시면 취소(Cancel)을 눌러주세요.") ? "방문" : "전화";
+            let method = confirm("방문 상담을 원하시면 확인(OK), 전화 상담을 원하시면 취소(Cancel)을 눌러주세요.") ? "방문" : "OK";
             
             let data = new FormData();
             data.append("action", "book");
